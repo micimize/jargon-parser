@@ -1,0 +1,65 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "address": {
+            "type": "object",
+            "properties": {
+                "street_address": {
+                    "type": "string",
+                    "help": "street number and name"
+                },
+                "city": {
+                    "type": "string",
+                    "default": "Austin"
+                },
+                "state": {
+                    "type": "string",
+                    "default": "TX"
+                }
+            },
+            "required": ["street_address", "city", "state"]
+        },
+        "product": {
+            "type": "object",
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": ["name"]
+        }
+    },
+
+    "type": "object",
+
+    "properties": {
+        "items": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/product"
+            },
+            "help": "array of items to purchase"
+        },
+        "billing_address": {
+            "$ref": "#/definitions/address",
+            "help": "address affiliated with credit card"
+        },
+        "shipping_address": {
+            "$ref": "#/definitions/address",
+            "help": "address to which we will ship the package",
+            "allOf": [
+                { "$ref": "#/definitions/address" },
+                {
+                    "properties": {
+                        "type": {"type": "string"}
+                    },
+                    "required": ["type"]
+                }
+            ]
+        }
+    },
+    "required": ["billing_address", "items"]
+}
