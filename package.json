@@ -1,8 +1,8 @@
 {
   "name": "jargon",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.1",
+  "description": "json schema driven argument parsing",
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublish": "./node_modules/.bin/babel -d lib src/"
