@@ -1,6 +1,6 @@
 {
   "name": "jargon-parser",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "json schema driven argument parsing",
   "main": "lib/index.js",
   "scripts": {
