@@ -1,5 +1,6 @@
 import $RefParser from 'json-schema-ref-parser'
 import { loopWhile } from 'deasync'
+import { collapse } from './utils'
 
 function isKey(token){
     return /^-.+/.test(token)
@@ -15,6 +16,7 @@ function normalize({token}){
     }
 }
 
+
 function readSubschema({schema, key}){
     var subSchema, done = false; 
     $RefParser.dereference(schema, (err, schema) => {
@@ -27,9 +29,7 @@ function readSubschema({schema, key}){
             schema = schema.items
         }
         if(schema.type == 'object'){
-            subSchema = schema.allOf && schema.allOf.length ?
-                schema.allOf.reduce((props, sub) => Object.assign(props, sub.properties || {}), {})[key] :
-                schema.properties[key]
+            subSchema = collapse(schema).properties[key]
             done = true
         } else {
             console.error(`schema ${schema} is not an object, or array of objects (failure on flag ${key})`);

@@ -1,4 +1,4 @@
-# jargon: argument parsers from json schemas
+# Jargon Parser: argument parsers from json schemas
 ```bash
 node test/parser.js                                 \
     --billing_address                               \

@@ -8,17 +8,20 @@ function isKey(token){
 
 export function array({schemaResolver, tokens: [token, ...tokens]}){
     let value = []
-    while(tokens.length > 0){
+    while(token){
         if( token == escapeCommand ){
             break;
         }
         if( isKey(token) ){
             let {value: subValue, remainder: [newToken, ...newTokens]} = object({schemaResolver, tokens: [token, ...tokens]})
+            value.push(subValue)
             token = newToken
             tokens = newTokens
-            value.push(subValue)
         } else {
             value.push(token)
+            let [newToken, ...newTokens] = tokens
+            token = newToken
+            tokens = newTokens
         }
     }
     return { value, remainder: tokens }
@@ -26,7 +29,7 @@ export function array({schemaResolver, tokens: [token, ...tokens]}){
 
 export function object({schemaResolver, tokens: [token, ...tokens]}){
     let value = {}
-    while(tokens.length > 0){
+    while(typeof(token) == 'string'){
         if( token == escapeCommand ){
             break;
         }

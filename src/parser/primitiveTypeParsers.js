@@ -13,7 +13,7 @@ export function boolean({tokens: [value, ...remainder]}){
     if (/^(true|false)$/.test(value)) {
         return {value: value === 'true', remainder}
     } else {
-        return { remainder: [value, ...remainder] }
+        return { value: true, remainder: [value, ...remainder] }
     }
 }
 

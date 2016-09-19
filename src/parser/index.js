@@ -3,8 +3,10 @@ import * as recursives from './recursiveTypeParsers'
 import schemaResolverFromParsers from '../schemaResolver'
 import { readFileSync } from 'fs'
 import Ajv from 'ajv'
+import addMergePatch from 'ajv-merge-patch'
 
-const ajv = new Ajv()
+let ajv = new Ajv({ coerceTypes: true, useDefaults: true, v5: true })
+addMergePatch(ajv)
 
 function parse({schema, tokens: [token, ...tokens]}){
     let validate = ajv.compile(schema)

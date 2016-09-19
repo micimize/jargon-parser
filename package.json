@@ -1,5 +1,5 @@
 {
-  "name": "jargon",
+  "name": "jargon-parser",
   "version": "0.0.1",
   "description": "json schema driven argument parsing",
   "main": "lib/index.js",
@@ -10,7 +10,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "ajv": "^4.5.0",
+    "ajv": "4.6.0",
+    "ajv-merge-patch": "2.0.0",
     "commander": "^2.9.0",
     "deasync": "^0.1.7",
     "json-schema-ref-parser": "^3.1.2"

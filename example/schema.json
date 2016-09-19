@@ -1,5 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
+
     "definitions": {
         "address": {
             "type": "object",
@@ -48,13 +49,13 @@
             "help": "address affiliated with credit card"
         },
         "shipping_address": {
-            "$ref": "#/definitions/address",
             "help": "address to which we will ship the package",
+            "type": "object",
             "allOf": [
                 { "$ref": "#/definitions/address" },
                 {
                     "properties": {
-                        "type": {"type": "string"}
+                        "type": { "type": "string" }
                     },
                     "required": ["type"]
                 }
