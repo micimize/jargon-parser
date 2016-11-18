@@ -1,44 +1,60 @@
-# Jargon Parser: argument parsers from json schemas, using subarg
+# Jargon Parser: argument parsers from json schemas, using [subarg](https://github.com/substack/subarg) syntax and the [ajv validator](https://github.com/epoberezkin/ajv)
 ```bash
 node test/parser.js                                 \
     --billing_address [                             \
-        --street_address "1234 fake st"             \
-        --city austin --state tx ]                  \
+        --street_address "1234 fake st" ]           \
     --shipping_address [                            \
         --street_address "2222 muddle drive"        \
-        --city houston --state tx --type business ] \
-    --items [ [ --name foo ] [ --price 0.99 --name bar ] ] \
+        --city houston --type business ] \
+    --items [ [ --name foo ] [ --price 0.99 --name bar ] bar ]
 ```
 yields
 ```json
 {
-    "options": {
-        "billing_address": {
-            "city": "austin",
-            "state": "tx",
-            "street_address": "1234 fake st"
-        },
-        "items": [
-            {
-                "name": "foo"
-            },
-            {
-                "name": "bar",
-                "price": 0.99
-            }
-        ],
-        "shipping_address": {
-            "city": "houston",
-            "state": "tx",
-            "street_address": "2222 muddle drive",
-            "type": "business"
-        }
+    "billing_address": {
+        "city": "austin",
+        "state": "tx",
+        "street_address": "1234 fake st"
     },
-    "unknown": []
+    "shipping_address": {
+        "city": "houston",
+        "state": "tx",
+        "street_address": "2222 muddle drive",
+        "type": "business"
+    },
+    "items": [
+        {
+            "name": "foo"
+        },
+        {
+            "name": "bar",
+            "price": 0.99
+        }
+    ],
 }
 ```
-given the sample schema in [`examples/schema.json`](example/schema.json)
-
-
-* "," command escapes the current nesting level for recursive structures
-* the current implementation has very limited functionality
+given the sample schema in [`examples/schema.json`](example/schema.json) (notice that `default`s are applied).
+  
+Jargon functions mostly the same as [subarg](https://github.com/substack/subarg), except that arrays and dictionaries are mutually exclusive in json. This means that `cli command --sub [ args args -f ]` is invalid, because it  the `subarg` result is
+```json
+{
+  "_": [ "command" ],
+  "sub": {
+    "_": [ "args" , "args" ],
+    "f": true
+  }
+}
+```
+So `[ "command" ]` and `{ "sub": ... }` would be in conflict,
+as would `[ "args" , "args" ]` and `{ "f": true }`.  
+A valid alternative would be `cli command [ --sub [ --list [ args args ] -f ] ]`, resulting in 
+```json
+{
+  "command": {
+    "sub": {
+      "list": [ "args" , "args" ],
+      "f": true
+    }
+  }
+}
+```
