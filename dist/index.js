@@ -3,11 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.utils = exports.default = undefined;
+exports.utils = exports.schema = exports.default = undefined;
 
 var _parser = require('./parser');
 
 var _parser2 = _interopRequireDefault(_parser);
+
+var _schema2 = require('./schema');
+
+var _schema = _interopRequireWildcard(_schema2);
 
 var _utils2 = require('./utils');
 
@@ -18,4 +22,5 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _parser2.default;
+exports.schema = _schema;
 exports.utils = _utils;

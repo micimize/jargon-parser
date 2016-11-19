@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+exports.thread = thread;
 exports.collapseMerge = collapseMerge;
 exports.collapseAllOf = collapseAllOf;
 exports.collapse = collapse;
@@ -15,6 +16,12 @@ exports.expand = expand;
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+function thread(value, functions) {
+    return functions.reduce(function (value, f) {
+        return f(value);
+    }, value);
+}
 
 function collapseMerge(schema) {
     if (schema['$merge']) {

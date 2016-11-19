@@ -1,3 +1,7 @@
+export function thread(value, functions){
+  return functions.reduce((value, f) => f(value), value)
+}
+
 export function collapseMerge(schema){
     if(schema['$merge']){
         let merge = schema['$merge']
