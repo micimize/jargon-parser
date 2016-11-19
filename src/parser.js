@@ -1,5 +1,5 @@
 import subarg from 'subarg'
-import { casterFactory } from './schema'
+import { newCaster } from './schema'
 import { thread } from './utils'
 
 /*
@@ -11,11 +11,11 @@ function normalizeSubargs({ '_': list, ...obj}){
   let normalize = token => typeof(token) == 'object' ? normalizeSubargs(token) : token
 
   if (list.length && Object.keys(obj).length){
-    console.log(`
-      list: ${list}
-      obj: ${obj}
+    throw TypeError(`
+      Lists and Objects cannot coexist under the same key.
+        List: ${list}
+        Object: ${obj}
     `)
-    throw TypeError("arrays and objects cannot coexist under the same key")
   }
 
   if(list.length){
@@ -28,13 +28,14 @@ function normalizeSubargs({ '_': list, ...obj}){
   }
 }
 
-export default function parser({schema, ...casterArgs}){
-  let castToSchema = casterFactory({ schema, ...casterArgs })
-  return (tokens = process.argv.slice(2)) => thread(
-    tokens, [
-        subarg,
-        normalizeSubargs,
-        castToSchema
-    ]
-  )
+export default function newParser({schema, schemaCaster, ...options}){
+  const caster = schemaCaster || newCaster({ schema })
+  function parser(tokens = process.argv.slice(2)){
+    return thread(tokens, [
+      subarg,
+      normalizeSubargs,
+      caster 
+    ])
+  }
+  return parser
 }

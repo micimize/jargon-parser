@@ -2,27 +2,18 @@ import { readFileSync } from 'fs'
 import Ajv from 'ajv'
 import addMergePatch from 'ajv-merge-patch'
 
-export function ajvCompiler(options = { coerceTypes: true, useDefaults: true, v5: true }){
+export function newAjvCompiler(options = { coerceTypes: true, useDefaults: true, v5: true }){
   let ajv = new Ajv(options)
   addMergePatch(ajv)
   return ajv
 }
 
-/*export function prettyError({
-  keyword, dataPath, schemaPath, params, message,
-  schema, parentSchema, data 
-}){
-  return `
-    failed ${keyword} check at ${schemaPath}:
-    ${dataPath} ${message}
-  `
-}
-console.error(`validation errors: `, validate.errors.map(prettyError).join('\n'))*/
+const defaultAjv = newAjvCompiler()
 
-export function casterFactory({
+export function newCaster({
   schema,
   encoding = 'utf-8',
-  compiler: ajv = ajvCompiler()
+  compiler: ajv = defaultAjv
 }){
   if (typeof(schema) == 'string'){
     schema = JSON.parse(readFileSync(schema, encoding))

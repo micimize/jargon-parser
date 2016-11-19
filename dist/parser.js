@@ -4,11 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-exports.default = parser;
+exports.default = newParser;
 
 var _subarg = require('subarg');
 
@@ -38,8 +36,7 @@ function normalizeSubargs(_ref) {
   };
 
   if (list.length && Object.keys(obj).length) {
-    console.log('\n      list: ' + list + '\n      obj: ' + obj + '\n    ');
-    throw TypeError("arrays and objects cannot coexist under the same key");
+    throw TypeError('\n      Lists and Objects cannot coexist under the same key.\n        List: ' + list + '\n        Object: ' + obj + '\n    ');
   }
 
   if (list.length) {
@@ -51,14 +48,17 @@ function normalizeSubargs(_ref) {
   }
 }
 
-function parser(_ref2) {
+function newParser(_ref2) {
   var schema = _ref2.schema;
+  var schemaCaster = _ref2.schemaCaster;
 
-  var casterArgs = _objectWithoutProperties(_ref2, ['schema']);
+  var options = _objectWithoutProperties(_ref2, ['schema', 'schemaCaster']);
 
-  var castToSchema = (0, _schema.casterFactory)(_extends({ schema: schema }, casterArgs));
-  return function () {
+  var caster = schemaCaster || (0, _schema.newCaster)({ schema: schema });
+  function parser() {
     var tokens = arguments.length <= 0 || arguments[0] === undefined ? process.argv.slice(2) : arguments[0];
-    return (0, _utils.thread)(tokens, [_subarg2.default, normalizeSubargs, castToSchema]);
-  };
+
+    return (0, _utils.thread)(tokens, [_subarg2.default, normalizeSubargs, caster]);
+  }
+  return parser;
 }
