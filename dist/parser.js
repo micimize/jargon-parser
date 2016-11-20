@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 exports.default = newParser;
@@ -15,6 +17,8 @@ var _subarg2 = _interopRequireDefault(_subarg);
 var _schema = require('./schema');
 
 var _utils = require('./utils');
+
+var _help = require('./help');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -51,14 +55,20 @@ function normalizeSubargs(_ref) {
 function newParser(_ref2) {
   var schema = _ref2.schema;
   var schemaCaster = _ref2.schemaCaster;
-
-  var options = _objectWithoutProperties(_ref2, ['schema', 'schemaCaster']);
+  var _ref2$name = _ref2.name;
+  var name = _ref2$name === undefined ? process.argv[1] : _ref2$name;
+  var _ref2$helpOptions = _ref2.helpOptions;
+  var helpOptions = _ref2$helpOptions === undefined ? {
+    flag: 'help',
+    catchErrors: true
+  } : _ref2$helpOptions;
 
   var caster = schemaCaster || (0, _schema.newCaster)({ schema: schema });
+  var helpWrapper = (0, _help.newHelpWrapper)(_extends({ name: name, schema: schema }, helpOptions));
   function parser() {
     var tokens = arguments.length <= 0 || arguments[0] === undefined ? process.argv.slice(2) : arguments[0];
 
     return (0, _utils.thread)(tokens, [_subarg2.default, normalizeSubargs, caster]);
   }
-  return parser;
+  return helpWrapper(parser);
 }
