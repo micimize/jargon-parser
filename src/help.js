@@ -1,28 +1,32 @@
 import { dereferenceSync } from './schema'
 
 const defaultFormat = {
-  string: v => (v ? `[default: "${v}"], ` : ''),
-  number: v => (v ? `[default: ${v}], ` : ''),
-  boolean: v => (typeof(v) == 'boolean' ? `[default: ${v}], ` : '')
+  string: v => (v ? `[default: "${v}"]` : ''),
+  number: v => (v ? `[default: ${v}]` : ''),
+  boolean: v => (typeof(v) == 'boolean' ? `[default: ${v}]` : '')
+}
+
+function stdFormat({default: v, help = ''}, { wrapDefault = _=>_} = {}){
+  return (v ? `\t[default: ${wrapDefault(v)}]` : '') + 
+    (v && help.length ? ',  ' : '') +
+    (help.length ? `\t# ${help}` : '')
 }
 
 const inlineFormat = {
-  string({ help, default: defaultValue, ...details }){
-    return `<string> ${defaultFormat.string(defaultValue)}${help}`
+  string(details){
+    return `<string> ${stdFormat(details, {wrapDefault: d=>`"${d}"`})}`
   },
-  number({ help, default: defaultValue, ...details }){
-    return `<number> ${defaultFormat.number(defaultValue)}${help}`
+  number(details){
+    return `<number> ${stdFormat(details)}`
   },
-  boolean({ help, default: defaultValue, ...details }){
-    return `${defaultFormat.boolean(defaultValue)}${help}`
-  },
+  boolean: stdFormat,
 
   // TODO default formatter for array and obj
-  object({ help, default: defaultValue, properties, ...details }){
+  object({ help = '', default: defaultValue, properties, ...details }){
     return `[ <properties> ] ${help}`
   },
-  array({ help, default: defaultValue, ...details }){
-    return `[ <items>... ] ${help}`
+  array({ help = '', default: defaultValue, ...details }){
+    return `[ <item>... ] ${help}`
   },
 }
 
@@ -30,30 +34,49 @@ function inlineFormatter({ type, ...details }){
   return inlineFormat[type](details)
 }
 
+function resolveProperties({ properties, allOf }){
+  return properties || Object.assign({}, ...allOf.map(resolveProperties))
+}
+
+function formatProperties({properties, keys}){
+  return keys.map(p => `\n--${p} ${verboseFormatter(properties[p])}`).join('')
+}
+
 const verboseFormat = {
   ...inlineFormat,
-  array({ help, default: defaultValue, items, ...details }){
-    return `[
-      ${verboseFormat(items)}, ...
-    ]`
+  array({ help = '', default: defaultValue, items, ...details }){
+    return `${verboseFormatter(items)}, ...items`
   },
-  object({ help, default: defaultValue, properties, required = [], ...details }){
+  object({ help = '', default: defaultValue, required = [], ...details }){
+    let properties = resolveProperties(details)
     let optional = Object.keys(properties).filter(p => !required.includes(p))
-    let optionalHelp = optional.length ? `
-    optional: ${optional.map(p => `
-    --${p} ${inlineFormatter(properties[p])}`)}` : ''
-    
-    return `
-  [ ${required.map(p => `
-    --${p} ${inlineFormatter(properties[p])}`)}
-    ${ optionalHelp }
-  ]`
+    return [
+      (help.length ? `# ${help}` : ''),
+      formatProperties({ properties, keys: required}), 
+      (optional.length ? '\noptional:' + formatProperties({ properties, keys: optional}) : '')
+    ].join('\n').trim().replace(/\n *\n/g, '\n')
   },
 }
 
+function indent(str){
+  return str.replace(/^(?=[^\n])/, '\n').replace(/\n/g, '\n  ').replace(/(?=[^\n *])$/, '\n')
+}
+
+function nest(type, str){
+  if(['object', 'array'].includes(type)){
+    return `[${indent(str)}\n]`
+  }
+  return str
+}
+
+function verboseFormatter({ type, ...details }, nested=true){
+  if(nested)
+    return nest(type, verboseFormat[type](details));
+  return verboseFormat[type](details)
+}
+
 export default function help({ name='jargon', schema }){
-  const { type, ...dereferencedSchema } = dereferenceSync(schema)
-  return `${name} ${verboseFormat[type](dereferencedSchema)}`
+  return `Usage: ${name} ${indent(verboseFormatter(dereferenceSync(schema), false))}`
 }
 
 
