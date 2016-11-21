@@ -81,7 +81,7 @@ By default help is displayed with the flag `--help` or on error,
 both of which can be customized via `helpOptions` passed to `newParser`: `{ flag: 'help', catchErrors: true }`
   
 <a name="help-caveat">**Caveat/technical details:**</a>  
-Currently, the only "schema intelligence" `--help` currently has is the ability to [resolve references](https://github.com/BigstickCarpet/json-schema-ref-parser) and merges `allOf` statments in `object`s. It is also as verbose as possible by default.
+Currently, the only "schema intelligence" `--help` currently has is the ability to [resolve references](https://github.com/BigstickCarpet/json-schema-ref-parser) and merge `allOf` statments in `object`s. It is also as verbose as possible by default.
 
   
 ## In depth usage / customization
