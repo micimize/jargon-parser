@@ -1,14 +1,22 @@
 {
   "name": "jargon-parser",
-  "version": "0.0.2",
-  "description": "json schema driven argument parsing",
+  "version": "0.1.0",
+  "description": "json schema driven argument parser",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublish": "./node_modules/.bin/babel -d dist/ src/",
     "watch": "./node_modules/.bin/babel -d dist/ src/ --watch"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/polypacker/jargon-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/polypacker/jargon-parser/issues"
+  },
+  "homepage": "https://github.com/polypacker/jargon-parser#readme",
+  "author": "Michael Joseph Rosenthal <rosenthalm93@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "ajv": "4.6.0",
