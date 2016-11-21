@@ -51,7 +51,8 @@ yields
 ```
 given the sample schema in [`examples/schema.json`](example/schema.json) (notice that `default`s are applied).
   
-## Help statements 
+## Help statements
+[**Note: Currently might not work with more complicated schemas**](#help-caveat)  
 `jargon-parser` uses [cliui](https://github.com/yargs/cliui) <small>(technically [this unmerged PR](https://github.com/yargs/cliui/pull/45))</small> for help formatting:
 ```bash
 node example/parser.js --help
@@ -79,8 +80,11 @@ Usage: example/parser
 By default help is displayed with the flag `--help` or on error,
 both of which can be customized via `helpOptions` passed to `newParser`: `{ flag: 'help', catchErrors: true }`
   
-## In depth usage / customization
+<a name="help-caveat">**Caveat/technical details:**</a>  
+Currently, the only "schema intelligence" `--help` currently has is the ability to [resolve references](https://github.com/BigstickCarpet/json-schema-ref-parser) and merges `allOf` statments in `object`s. It is also as verbose as possible by default.
+
   
+## In depth usage / customization
 The [`default` export `newParser({schema, schemaCaster, name, helpOptions})`](src/parser.js#L31-L41) returns a `parser` that takes an optional array of `argv` arguments,
 defaulting to `process.argv.slice(2)`, and returns the validated/cast result.
 
