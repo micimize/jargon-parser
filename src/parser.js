@@ -1,6 +1,7 @@
 import subarg from 'subarg'
 import { newCaster } from './schema'
 import { thread } from './utils'
+import { newHelpWrapper } from './help'
 
 /*
  * essentially the only difference between subarg's result and jargon's result is that
@@ -28,14 +29,22 @@ function normalizeSubargs({ '_': list, ...obj}){
   }
 }
 
-export default function newParser({schema, schemaCaster, ...options}){
+export default function newParser({
+  schema,
+  schemaCaster,
+  name,
+  helpOptions = {
+    flag: 'help',
+    catchErrors: true
+  }}){
   const caster = schemaCaster || newCaster({ schema })
+  const helpWrapper = newHelpWrapper({ name, schema, ...helpOptions })
   function parser(tokens = process.argv.slice(2)){
     return thread(tokens, [
-      subarg,
-      normalizeSubargs,
-      caster 
-    ])
+        subarg,
+        normalizeSubargs,
+        caster
+      ])
   }
-  return parser
+  return helpWrapper(parser)
 }

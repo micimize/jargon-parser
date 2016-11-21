@@ -1,3 +1,4 @@
+const path = require('path')
 const newParser = require('../dist').default
 
 const cli = newParser({ schema: __dirname + '/schema.json' })

@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.newAjvCompiler = newAjvCompiler;
+exports.dereferenceSync = dereferenceSync;
 exports.newCaster = newCaster;
 
 var _fs = require('fs');
@@ -16,6 +17,14 @@ var _ajvMergePatch = require('ajv-merge-patch');
 
 var _ajvMergePatch2 = _interopRequireDefault(_ajvMergePatch);
 
+var _jsonSchemaRefParser = require('json-schema-ref-parser');
+
+var _jsonSchemaRefParser2 = _interopRequireDefault(_jsonSchemaRefParser);
+
+var _deasync = require('deasync');
+
+var _utils = require('./utils');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function newAjvCompiler() {
@@ -24,6 +33,21 @@ function newAjvCompiler() {
   var ajv = new _ajv2.default(options);
   (0, _ajvMergePatch2.default)(ajv);
   return ajv;
+}
+
+function dereferenceSync(schema) {
+  var dereferenced = false;
+  _jsonSchemaRefParser2.default.dereference(schema, function (err, dereferencedSchema) {
+    if (err) {
+      console.error(err);
+      process.exit();
+    }
+    dereferenced = dereferencedSchema;
+  });
+  (0, _deasync.loopWhile)(function (_) {
+    return !dereferenced;
+  });
+  return dereferenced;
 }
 
 var defaultAjv = newAjvCompiler();
