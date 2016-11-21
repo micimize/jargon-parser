@@ -15,6 +15,10 @@ var _cliui = require('cliui');
 
 var _cliui2 = _interopRequireDefault(_cliui);
 
+var _colors = require('colors');
+
+var _colors2 = _interopRequireDefault(_colors);
+
 var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
@@ -45,13 +49,17 @@ function stdFormat(_ref) {
 
   var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-  var type = _ref2.type;
+  var _ref2$type = _ref2.type;
+  var type = _ref2$type === undefined ? 'any' : _ref2$type;
   var _ref2$wrapDefault = _ref2.wrapDefault;
   var wrapDefault = _ref2$wrapDefault === undefined ? function (_) {
     return _;
   } : _ref2$wrapDefault;
 
-  return [type ? '<' + type + '> ' : '', v ? '[default: ' + wrapDefault(v) + ']' : optional ? '[optional]' : '[required]', help.length ? '# ' + help : ''].join('\t');
+  if (Array.isArray(type)) {
+    type = type.join('|');
+  }
+  return ['<' + type + '> ', v ? '[default: ' + wrapDefault(v) + ']' : optional ? '[optional]' : '[required]', help.length ? '# ' + help : ''].join('\t');
 }
 
 var inlineFormat = {
@@ -93,7 +101,7 @@ function inlineFormatter(_ref5) {
 
   var details = _objectWithoutProperties(_ref5, ['type']);
 
-  return inlineFormat[type](details);
+  return inlineFormat[type] ? inlineFormat[type](details) : stdFormat(details, { type: type });
 }
 
 function resolveProperties(_ref6) {
@@ -159,8 +167,8 @@ function verboseFormatter(_ref10) {
 
   var nested = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-  if (nested) return nest(type, verboseFormat[type](details));
-  return verboseFormat[type](details);
+  var formatted = verboseFormat[type] ? verboseFormat[type](details) : stdFormat(details, { type: type });
+  return nested ? nest(type, formatted) : formatted;
 }
 
 function help(_ref11) {
@@ -168,9 +176,17 @@ function help(_ref11) {
   var name = _ref11$name === undefined ? 'jargon' : _ref11$name;
   var schema = _ref11.schema;
 
-  var ui = (0, _cliui2.default)();
-  ui.div('Usage: ' + name + ' ' + indent(verboseFormatter((0, _schema.dereferenceSync)(schema), false)));
-  return ui.toString();
+  try {
+    var ui = (0, _cliui2.default)();
+    ui.div('Usage: ' + name + ' ' + indent(verboseFormatter((0, _schema.dereferenceSync)(schema), false)));
+    return ui.toString();
+  } catch (err) {
+    var _ui = (0, _cliui2.default)();
+    _ui.div({
+      padding: [1, 2, 1, 2],
+      text: _colors2.default.red.bold('Jargon Parser Encountered error while building help statement\n') + 'The given schema is probably too complex for the help generator. \n' + ('Please open an issue at ' + _colors2.default.blue.underline('https://github.com/polypacker/jargon-parser/issues') + ' ') + 'with your stacktrace and schema, so we can work on supporting it.' });
+    return _ui.toString();
+  }
 }
 
 function newHelpWrapper(_ref12) {

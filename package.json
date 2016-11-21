@@ -1,6 +1,6 @@
 {
   "name": "jargon-parser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "json schema driven argument parser",
   "main": "dist/index.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "ajv": "4.6.0",
     "ajv-merge-patch": "2.0.0",
     "cliui": "git+https://git@github.com/yargs/cliui.git#feat/fallback",
+    "colors": "^1.1.2",
     "deasync": "^0.1.7",
     "json-schema-ref-parser": "^3.1.2",
     "subarg": "^1.0.0"

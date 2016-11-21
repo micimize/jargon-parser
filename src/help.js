@@ -1,5 +1,6 @@
 import { dereferenceSync } from './schema'
 import cliui from 'cliui'
+import colors from 'colors'
 import path from 'path'
 
 const defaultFormat = {
@@ -8,9 +9,14 @@ const defaultFormat = {
   boolean: v => (typeof(v) == 'boolean' ? `[default: ${v}]` : '')
 }
 
-function stdFormat({default: v, help = '', optional}, { type, wrapDefault = _=>_ } = {}){
+function stdFormat(
+  {default: v, help = '', optional},
+  { type = 'any', wrapDefault = _=>_ } = {}){
+  if(Array.isArray(type)){
+    type = type.join('|')
+  }
   return [
-    (type ? `<${type}> ` : ''),
+    `<${type}> `,
     (v ? `[default: ${wrapDefault(v)}]` : (optional ? '[optional]' : '[required]')),
     (help.length ? `# ${help}` : '')
   ].join('\t')
@@ -31,11 +37,11 @@ const inlineFormat = {
   },
   array({ help = '', default: defaultValue, ...details }){
     return `[ <item>... ] ${help}`
-  },
+  }
 }
 
 function inlineFormatter({ type, ...details }){
-  return inlineFormat[type](details)
+  return inlineFormat[type] ? inlineFormat[type](details) : stdFormat(details, {type})
 }
 
 function resolveProperties({ properties, allOf }){
@@ -74,15 +80,27 @@ function nest(type, str){
 }
 
 function verboseFormatter({ type, ...details }, nested=true){
-  if(nested)
-    return nest(type, verboseFormat[type](details));
-  return verboseFormat[type](details)
+  let formatted = verboseFormat[type] ?
+    verboseFormat[type](details) :
+    stdFormat(details, {type})
+  return nested ? nest(type, formatted) : formatted
 }
 
 export default function help({ name='jargon', schema }){
-  let ui = cliui()
-  ui.div(`Usage: ${name} ${indent(verboseFormatter(dereferenceSync(schema), false))}`)
-  return ui.toString()
+  try {
+    let ui = cliui()
+    ui.div(`Usage: ${name} ${indent(verboseFormatter(dereferenceSync(schema), false))}`)
+    return ui.toString()
+  } catch(err) {
+    let ui = cliui()
+    ui.div({
+      padding: [1, 2, 1, 2],
+      text: colors.red.bold('Jargon Parser Encountered error while building help statement\n')   +
+            'The given schema is probably too complex for the help generator. \n' +
+            `Please open an issue at ${colors.blue.underline('https://github.com/polypacker/jargon-parser/issues')} ` +
+            'with your stacktrace and schema, so we can work on supporting it.' })
+    return ui.toString()
+  }
 }
 
 export function newHelpWrapper({
