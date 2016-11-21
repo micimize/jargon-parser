@@ -85,12 +85,12 @@ Currently, the only "schema intelligence" `--help` currently has is the ability 
 
   
 ## In depth usage / customization
-The [`default` export `newParser({schema, schemaCaster, name, helpOptions})`](src/parser.js#L31-L41) returns a `parser` that takes an optional array of `argv` arguments,
+The [`default` export `newParser({schema, schemaCaster, name, helpOptions})`](src/parser.js#L32) returns a `parser` that takes an optional array of `argv` arguments,
 defaulting to `process.argv.slice(2)`, and returns the validated/cast result.
 
 `schema` and `schemaCaster` are mutually exclusive, and `schemaCaster` takes precedence.
 If `schema` is provided, either as as a relative path or object,
-it will be passed to [newCaster](src/schema.js#L22-L38) with the [default ajv compiler](src/schema.js#L5-L9),
+it will be passed to [newCaster](src/schema.js#L30) with the [default ajv compiler](src/schema.js#L9),
 which will construct [`Avj`](https://github.com/epoberezkin/ajv) with the arguments `{ coerceTypes: true, useDefaults: true, v5: true }`.
 The result of `newParser` 
   
