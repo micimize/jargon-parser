@@ -1,4 +1,5 @@
 import { dereferenceSync } from './schema'
+import cliui from 'cliui'
 
 const defaultFormat = {
   string: v => (v ? `[default: "${v}"]` : ''),
@@ -6,18 +7,20 @@ const defaultFormat = {
   boolean: v => (typeof(v) == 'boolean' ? `[default: ${v}]` : '')
 }
 
-function stdFormat({default: v, help = ''}, { wrapDefault = _=>_} = {}){
-  return (v ? `\t[default: ${wrapDefault(v)}]` : '') + 
-    (v && help.length ? ',  ' : '') +
-    (help.length ? `\t# ${help}` : '')
+function stdFormat({default: v, help = '', optional}, { type, wrapDefault = _=>_ } = {}){
+  return [
+    (type ? `<${type}> ` : ''),
+    (v ? `[default: ${wrapDefault(v)}]` : (optional ? '[optional]' : '[required]')),
+    (help.length ? `# ${help}` : '')
+  ].join('\t')
 }
 
 const inlineFormat = {
   string(details){
-    return `<string> ${stdFormat(details, {wrapDefault: d=>`"${d}"`})}`
+    return stdFormat(details, { wrapDefault: d=>`"${d}"`, type: 'string' })
   },
   number(details){
-    return `<number> ${stdFormat(details)}`
+    return stdFormat(details, { type: 'number' })
   },
   boolean: stdFormat,
 
@@ -38,8 +41,8 @@ function resolveProperties({ properties, allOf }){
   return properties || Object.assign({}, ...allOf.map(resolveProperties))
 }
 
-function formatProperties({properties, keys}){
-  return keys.map(p => `\n--${p} ${verboseFormatter(properties[p])}`).join('')
+function formatProperties({properties, keys, optional}){
+  return keys.map(p => `\n--${p} ${verboseFormatter({optional, ...properties[p]})}`).join('')
 }
 
 const verboseFormat = {
@@ -53,7 +56,7 @@ const verboseFormat = {
     return [
       (help.length ? `# ${help}` : ''),
       formatProperties({ properties, keys: required}), 
-      (optional.length ? '\noptional:' + formatProperties({ properties, keys: optional}) : '')
+      (optional.length ? formatProperties({ properties, keys: optional, optional: true}) : '')
     ].join('\n').trim().replace(/\n *\n/g, '\n')
   },
 }
@@ -76,7 +79,9 @@ function verboseFormatter({ type, ...details }, nested=true){
 }
 
 export default function help({ name='jargon', schema }){
-  return `Usage: ${name} ${indent(verboseFormatter(dereferenceSync(schema), false))}`
+  let ui = cliui()
+  ui.div(`Usage: ${name} ${indent(verboseFormatter(dereferenceSync(schema), false))}`)
+  return ui.toString()
 }
 
 

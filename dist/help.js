@@ -11,6 +11,12 @@ exports.newHelpWrapper = newHelpWrapper;
 
 var _schema = require('./schema');
 
+var _cliui = require('cliui');
+
+var _cliui2 = _interopRequireDefault(_cliui);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
@@ -31,25 +37,27 @@ function stdFormat(_ref) {
   var v = _ref.default;
   var _ref$help = _ref.help;
   var help = _ref$help === undefined ? '' : _ref$help;
+  var optional = _ref.optional;
 
   var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
+  var type = _ref2.type;
   var _ref2$wrapDefault = _ref2.wrapDefault;
   var wrapDefault = _ref2$wrapDefault === undefined ? function (_) {
     return _;
   } : _ref2$wrapDefault;
 
-  return (v ? '\t[default: ' + wrapDefault(v) + ']' : '') + (v && help.length ? ',  ' : '') + (help.length ? '\t# ' + help : '');
+  return [type ? '<' + type + '> ' : '', v ? '[default: ' + wrapDefault(v) + ']' : optional ? '[optional]' : '[required]', help.length ? '# ' + help : ''].join('\t');
 }
 
 var inlineFormat = {
   string: function string(details) {
-    return '<string> ' + stdFormat(details, { wrapDefault: function wrapDefault(d) {
+    return stdFormat(details, { wrapDefault: function wrapDefault(d) {
         return '"' + d + '"';
-      } });
+      }, type: 'string' });
   },
   number: function number(details) {
-    return '<number> ' + stdFormat(details);
+    return stdFormat(details, { type: 'number' });
   },
 
   boolean: stdFormat,
@@ -94,9 +102,10 @@ function resolveProperties(_ref6) {
 function formatProperties(_ref7) {
   var properties = _ref7.properties;
   var keys = _ref7.keys;
+  var optional = _ref7.optional;
 
   return keys.map(function (p) {
-    return '\n--' + p + ' ' + verboseFormatter(properties[p]);
+    return '\n--' + p + ' ' + verboseFormatter(_extends({ optional: optional }, properties[p]));
   }).join('');
 }
 
@@ -124,7 +133,7 @@ var verboseFormat = _extends({}, inlineFormat, {
     var optional = Object.keys(properties).filter(function (p) {
       return !required.includes(p);
     });
-    return [help.length ? '# ' + help : '', formatProperties({ properties: properties, keys: required }), optional.length ? '\noptional:' + formatProperties({ properties: properties, keys: optional }) : ''].join('\n').trim().replace(/\n *\n/g, '\n');
+    return [help.length ? '# ' + help : '', formatProperties({ properties: properties, keys: required }), optional.length ? formatProperties({ properties: properties, keys: optional, optional: true }) : ''].join('\n').trim().replace(/\n *\n/g, '\n');
   }
 });
 
@@ -155,7 +164,9 @@ function help(_ref11) {
   var name = _ref11$name === undefined ? 'jargon' : _ref11$name;
   var schema = _ref11.schema;
 
-  return 'Usage: ' + name + ' ' + indent(verboseFormatter((0, _schema.dereferenceSync)(schema), false));
+  var ui = (0, _cliui2.default)();
+  ui.div('Usage: ' + name + ' ' + indent(verboseFormatter((0, _schema.dereferenceSync)(schema), false)));
+  return ui.toString();
 }
 
 function newHelpWrapper(_ref12) {
