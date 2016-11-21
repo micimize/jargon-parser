@@ -55,8 +55,7 @@ function normalizeSubargs(_ref) {
 function newParser(_ref2) {
   var schema = _ref2.schema;
   var schemaCaster = _ref2.schemaCaster;
-  var _ref2$name = _ref2.name;
-  var name = _ref2$name === undefined ? process.argv[1] : _ref2$name;
+  var name = _ref2.name;
   var _ref2$helpOptions = _ref2.helpOptions;
   var helpOptions = _ref2$helpOptions === undefined ? {
     flag: 'help',

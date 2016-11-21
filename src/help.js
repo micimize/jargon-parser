@@ -1,5 +1,6 @@
 import { dereferenceSync } from './schema'
 import cliui from 'cliui'
+import path from 'path'
 
 const defaultFormat = {
   string: v => (v ? `[default: "${v}"]` : ''),
@@ -84,8 +85,12 @@ export default function help({ name='jargon', schema }){
   return ui.toString()
 }
 
-
-export function newHelpWrapper({ name='jargon', flag='help', catchErrors=true, schema }){
+export function newHelpWrapper({
+  name=path.relative(process.cwd(), process.argv[1]),
+  flag='help',
+  catchErrors=true,
+  schema
+}){
   const helpStatement = help({ name, schema })
   function displayHelp(){
     console.info(helpStatement)

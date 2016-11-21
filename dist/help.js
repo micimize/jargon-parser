@@ -15,6 +15,10 @@ var _cliui = require('cliui');
 
 var _cliui2 = _interopRequireDefault(_cliui);
 
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -171,7 +175,7 @@ function help(_ref11) {
 
 function newHelpWrapper(_ref12) {
   var _ref12$name = _ref12.name;
-  var name = _ref12$name === undefined ? 'jargon' : _ref12$name;
+  var name = _ref12$name === undefined ? _path2.default.relative(process.cwd(), process.argv[1]) : _ref12$name;
   var _ref12$flag = _ref12.flag;
   var flag = _ref12$flag === undefined ? 'help' : _ref12$flag;
   var _ref12$catchErrors = _ref12.catchErrors;

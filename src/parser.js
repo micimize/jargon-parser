@@ -32,7 +32,7 @@ function normalizeSubargs({ '_': list, ...obj}){
 export default function newParser({
   schema,
   schemaCaster,
-  name = process.argv[1],
+  name,
   helpOptions = {
     flag: 'help',
     catchErrors: true
