@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 exports.default = help;
@@ -25,9 +27,9 @@ var _path2 = _interopRequireDefault(_path);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var defaultFormat = {
   string: function string(v) {
@@ -42,6 +44,8 @@ var defaultFormat = {
 };
 
 function stdFormat(_ref) {
+  var _ref$type = _ref.type;
+  var type = _ref$type === undefined ? 'any' : _ref$type;
   var v = _ref.default;
   var _ref$help = _ref.help;
   var help = _ref$help === undefined ? '' : _ref$help;
@@ -49,143 +53,205 @@ function stdFormat(_ref) {
 
   var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-  var _ref2$type = _ref2.type;
-  var type = _ref2$type === undefined ? 'any' : _ref2$type;
   var _ref2$wrapDefault = _ref2.wrapDefault;
   var wrapDefault = _ref2$wrapDefault === undefined ? function (_) {
     return _;
   } : _ref2$wrapDefault;
+  var _ref2$wrapType = _ref2.wrapType;
+  var wrapType = _ref2$wrapType === undefined ? function (_) {
+    return _;
+  } : _ref2$wrapType;
 
+  if (type == 'string') {
+    wrapDefault = function wrapDefault(d) {
+      return '"' + d + '"';
+    };
+  }
   if (Array.isArray(type)) {
     type = type.join('|');
   }
-  return ['<' + type + '> ', v ? '[default: ' + wrapDefault(v) + ']' : optional ? '[optional]' : '[required]', help.length ? '# ' + help : ''].join('\t');
+  return [wrapType('<' + type + '>') + ' ', v ? '[default: ' + wrapDefault(v) + ']' : optional ? '[optional]' : '[required]', help.length ? '# ' + help : ''].join('\t');
 }
 
-var inlineFormat = {
-  string: function string(details) {
-    return stdFormat(details, { wrapDefault: function wrapDefault(d) {
-        return '"' + d + '"';
-      }, type: 'string' });
-  },
-  number: function number(details) {
-    return stdFormat(details, { type: 'number' });
-  },
-
-  boolean: stdFormat,
-
-  // TODO default formatter for array and obj
-  object: function object(_ref3) {
-    var _ref3$help = _ref3.help;
-    var help = _ref3$help === undefined ? '' : _ref3$help;
-    var defaultValue = _ref3.default;
-    var properties = _ref3.properties;
-
-    var details = _objectWithoutProperties(_ref3, ['help', 'default', 'properties']);
-
-    return '[ <properties> ] ' + help;
-  },
-  array: function array(_ref4) {
-    var _ref4$help = _ref4.help;
-    var help = _ref4$help === undefined ? '' : _ref4$help;
-    var defaultValue = _ref4.default;
-
-    var details = _objectWithoutProperties(_ref4, ['help', 'default']);
-
-    return '[ <item>... ] ' + help;
-  }
-};
-
-function inlineFormatter(_ref5) {
-  var type = _ref5.type;
-
-  var details = _objectWithoutProperties(_ref5, ['type']);
-
-  return inlineFormat[type] ? inlineFormat[type](details) : stdFormat(details, { type: type });
-}
-
-function resolveProperties(_ref6) {
-  var properties = _ref6.properties;
-  var allOf = _ref6.allOf;
+function resolveProperties(_ref3) {
+  var properties = _ref3.properties;
+  var allOf = _ref3.allOf;
 
   return properties || Object.assign.apply(Object, [{}].concat(_toConsumableArray(allOf.map(resolveProperties))));
 }
 
-function formatProperties(_ref7) {
-  var properties = _ref7.properties;
-  var keys = _ref7.keys;
-  var optional = _ref7.optional;
+function formatProperties(_ref4) {
+  var properties = _ref4.properties;
+  var keys = _ref4.keys;
+  var optional = _ref4.optional;
 
   return keys.map(function (p) {
-    return '\n--' + p + ' ' + verboseFormatter(_extends({ optional: optional }, properties[p]));
+    return '\n--' + p + ' ' + verboseFormatter(_extends({ optional: optional }, properties[p]), { property: p });
   }).join('');
 }
 
-var verboseFormat = _extends({}, inlineFormat, {
-  array: function array(_ref8) {
-    var _ref8$help = _ref8.help;
-    var help = _ref8$help === undefined ? '' : _ref8$help;
-    var defaultValue = _ref8.default;
-    var items = _ref8.items;
+var verboseFormat = {
+  array: function array(_ref5, _ref6) {
+    var _ref5$help = _ref5.help;
+    var help = _ref5$help === undefined ? '' : _ref5$help;
+    var defaultValue = _ref5.default;
+    var items = _ref5.items;
 
-    var details = _objectWithoutProperties(_ref8, ['help', 'default', 'items']);
+    var details = _objectWithoutProperties(_ref5, ['help', 'default', 'items']);
 
-    return verboseFormatter(items) + ', ...items';
+    var nested = _ref6.nested;
+    var _ref6$property = _ref6.property;
+    var property = _ref6$property === undefined ? 'items' : _ref6$property;
+
+    if (items.type == 'object') {
+      return nest(verboseFormatter(items, { nested: true, wrapType: function wrapType(type) {
+          return type + ',\n...' + property;
+        } }), help);
+    } else {
+      return verboseFormatter(_extends({ help: help }, items), { nested: false, wrapType: function wrapType(type) {
+          return '[ ' + type + ', ...' + property + ' ]';
+        } });
+    }
   },
-  object: function object(_ref9) {
-    var _ref9$help = _ref9.help;
-    var help = _ref9$help === undefined ? '' : _ref9$help;
-    var defaultValue = _ref9.default;
-    var _ref9$required = _ref9.required;
-    var required = _ref9$required === undefined ? [] : _ref9$required;
+  object: function object(_ref7, _ref8) {
+    var _ref7$help = _ref7.help;
+    var help = _ref7$help === undefined ? '' : _ref7$help;
+    var defaultValue = _ref7.default;
+    var _ref7$required = _ref7.required;
+    var required = _ref7$required === undefined ? [] : _ref7$required;
 
-    var details = _objectWithoutProperties(_ref9, ['help', 'default', 'required']);
+    var details = _objectWithoutProperties(_ref7, ['help', 'default', 'required']);
+
+    var nested = _ref8.nested;
+    var _ref8$wrapType = _ref8.wrapType;
+    var wrapType = _ref8$wrapType === undefined ? function (_) {
+      return _;
+    } : _ref8$wrapType;
 
     var properties = resolveProperties(details);
     var optional = Object.keys(properties).filter(function (p) {
       return !required.includes(p);
     });
-    return [help.length ? '# ' + help : '', formatProperties({ properties: properties, keys: required }), optional.length ? formatProperties({ properties: properties, keys: optional, optional: true }) : ''].join('\n').trim().replace(/\n *\n/g, '\n');
+    var formatted = [formatProperties({ properties: properties, keys: required }), optional.length ? formatProperties({ properties: properties, keys: optional, optional: true }) : ''].join('\n').trim().replace(/\n *\n/g, '\n');
+    return wrapType(nested ? nest(formatted, help) : formatted);
   }
-});
+};
 
 function indent(str) {
   return str.replace(/^(?=[^\n])/, '\n').replace(/\n/g, '\n  ').replace(/(?=[^\n *])$/, '\n');
 }
 
-function nest(type, str) {
-  if (['object', 'array'].includes(type)) {
-    return '[' + indent(str) + '\n]';
-  }
-  return str;
+function nest(str) {
+  var help = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+
+  return '[\t\t' + (help.length ? '# ' + help : '') + indent(str) + '\n]';
 }
 
-function verboseFormatter(_ref10) {
-  var type = _ref10.type;
+function verboseFormatter(details) {
+  var _ref9 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-  var details = _objectWithoutProperties(_ref10, ['type']);
+  var _ref9$nested = _ref9.nested;
+  var nested = _ref9$nested === undefined ? true : _ref9$nested;
+  var _ref9$wrapType = _ref9.wrapType;
+  var wrapType = _ref9$wrapType === undefined ? function (_) {
+    return _;
+  } : _ref9$wrapType;
 
-  var nested = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+  var rest = _objectWithoutProperties(_ref9, ['nested', 'wrapType']);
 
-  var formatted = verboseFormat[type] ? verboseFormat[type](details) : stdFormat(details, { type: type });
-  return nested ? nest(type, formatted) : formatted;
+  var configuration = _extends({ nested: nested, wrapType: wrapType }, rest);
+  return verboseFormat[details.type] ? verboseFormat[details.type](details, configuration) : stdFormat(details, configuration);
+}
+
+function greater(val, val2) {
+  return val < val2 ? val2 : val;
+}
+
+function getMaxWidths(rows) {
+  var widths = rows.reduce(function (_ref10, row) {
+    var flagInfo = _ref10.flagInfo;
+    var required = _ref10.required;
+    var help = _ref10.help;
+
+    var _row$split = row.split('\t');
+
+    var _row$split2 = _slicedToArray(_row$split, 3);
+
+    var _row$split2$ = _row$split2[0];
+    var f = _row$split2$ === undefined ? '' : _row$split2$;
+    var _row$split2$2 = _row$split2[1];
+    var r = _row$split2$2 === undefined ? '' : _row$split2$2;
+    var _row$split2$3 = _row$split2[2];
+    var h = _row$split2$3 === undefined ? '' : _row$split2$3;
+
+    flagInfo = greater(flagInfo, f.length);
+    required = greater(required, r.length);
+    help = greater(help, h.length);
+    return { flagInfo: flagInfo, required: required, help: help };
+  }, { flagInfo: 0, required: 0, help: 0 });
+  var desiredHelpWidth = widths.help;
+  widths.help = process.stdout.columns - widths.required - widths.flagInfo - 8; // padding
+  if (widths.help < 0 /*|| widths.help < desiredHelpWidth / 4*/) {
+      return { flagInfo: 0, required: 0, help: 0 };
+    }
+  return widths;
+}
+
+function buildColumns(row, widths) {
+  var _row$split3 = row.split('\t');
+
+  var _row$split4 = _slicedToArray(_row$split3, 3);
+
+  var flagInfo = _row$split4[0];
+  var _row$split4$ = _row$split4[1];
+  var required = _row$split4$ === undefined ? '' : _row$split4$;
+  var _row$split4$2 = _row$split4[2];
+  var help = _row$split4$2 === undefined ? '' : _row$split4$2;
+
+  return [{
+    text: flagInfo,
+    width: widths.flagInfo + 4,
+    padding: [0, 2, 0, 2 + flagInfo.search(/\S|$/)]
+  }, {
+    text: required,
+    width: widths.required + 2,
+    padding: [0, 2, 0, 0]
+  }, {
+    text: help,
+    width: widths.help + 2,
+    padding: [0, 2, 0, 0]
+  }];
+}
+
+function formatHelp(str) {
+  var ui = (0, _cliui2.default)({ width: process.stdout.columns });
+  var rows = str.split('\n');
+  var widths = getMaxWidths(rows);
+  rows.map(function (row) {
+    return buildColumns(row, widths);
+  }).forEach(function (row) {
+    return ui.div.apply(ui, _toConsumableArray(row));
+  });
+  return ui.toString();
 }
 
 function help(_ref11) {
   var _ref11$name = _ref11.name;
   var name = _ref11$name === undefined ? 'jargon' : _ref11$name;
+  var description = _ref11.description;
   var schema = _ref11.schema;
 
+  schema = (0, _schema.dereferenceSync)(schema);
+  var topLevelDescription = description ? '\n' + description : schema.help ? '\n\n' + schema.help + '\n' : '';
   try {
-    var ui = (0, _cliui2.default)();
-    ui.div('Usage: ' + name + ' ' + indent(verboseFormatter((0, _schema.dereferenceSync)(schema), false)));
-    return ui.toString();
+    return '\nUsage: ' + name + ' ' + topLevelDescription + ' \nArguments:\n\n' + formatHelp(verboseFormatter(schema, { nested: false }));
   } catch (err) {
-    var _ui = (0, _cliui2.default)();
-    _ui.div({
+    console.error(err);
+    var ui = (0, _cliui2.default)({ width: process.stdout.columns });
+    ui.div({
       padding: [1, 2, 1, 2],
       text: _colors2.default.red.bold('Jargon Parser Encountered error while building help statement\n') + 'The given schema is probably too complex for the help generator. \n' + ('Please open an issue at ' + _colors2.default.blue.underline('https://github.com/polypacker/jargon-parser/issues') + ' ') + 'with your stacktrace and schema, so we can work on supporting it.' });
-    return _ui.toString();
+    return ui.toString();
   }
 }
 
@@ -198,7 +264,9 @@ function newHelpWrapper(_ref12) {
   var catchErrors = _ref12$catchErrors === undefined ? true : _ref12$catchErrors;
   var schema = _ref12.schema;
 
-  var helpStatement = help({ name: name, schema: schema });
+  var rest = _objectWithoutProperties(_ref12, ['name', 'flag', 'catchErrors', 'schema']);
+
+  var helpStatement = help(_extends({ name: name, schema: schema }, rest));
   function displayHelp() {
     console.info(helpStatement);
     process.exit();
@@ -216,7 +284,6 @@ function newHelpWrapper(_ref12) {
       try {
         return func.apply(undefined, [tokens].concat(args));
       } catch (err) {
-        console.log('caught');
         if (catchErrors) {
           console.error(err.message);
           //console.error(err.stack)

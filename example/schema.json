@@ -35,6 +35,7 @@
     },
 
     "type": "object",
+    "help": "A delivery order",
 
     "properties": {
         "items": {

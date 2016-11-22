@@ -33,12 +33,14 @@ export default function newParser({
   schema,
   schemaCaster,
   name,
+  description,
   helpOptions = {
     flag: 'help',
     catchErrors: true
   }}){
   const caster = schemaCaster || newCaster({ schema })
-  const helpWrapper = newHelpWrapper({ name, schema, ...helpOptions })
+  const helpWrapper = newHelpWrapper({ name, description, schema, ...helpOptions })
+
   function parser(tokens = process.argv.slice(2)){
     return thread(tokens, [
         subarg,

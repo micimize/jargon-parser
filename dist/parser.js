@@ -56,6 +56,7 @@ function newParser(_ref2) {
   var schema = _ref2.schema;
   var schemaCaster = _ref2.schemaCaster;
   var name = _ref2.name;
+  var description = _ref2.description;
   var _ref2$helpOptions = _ref2.helpOptions;
   var helpOptions = _ref2$helpOptions === undefined ? {
     flag: 'help',
@@ -63,7 +64,8 @@ function newParser(_ref2) {
   } : _ref2$helpOptions;
 
   var caster = schemaCaster || (0, _schema.newCaster)({ schema: schema });
-  var helpWrapper = (0, _help.newHelpWrapper)(_extends({ name: name, schema: schema }, helpOptions));
+  var helpWrapper = (0, _help.newHelpWrapper)(_extends({ name: name, description: description, schema: schema }, helpOptions));
+
   function parser() {
     var tokens = arguments.length <= 0 || arguments[0] === undefined ? process.argv.slice(2) : arguments[0];
 

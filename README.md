@@ -53,28 +53,33 @@ given the sample schema in [`examples/schema.json`](example/schema.json) (notice
   
 ## Help statements
 [**Note: Currently might not work with more complicated schemas**](#help-caveat)  
-`jargon-parser` uses [cliui](https://github.com/yargs/cliui) <small>(technically [this unmerged PR](https://github.com/yargs/cliui/pull/45))</small> for help formatting:
+`jargon-parser` uses [cliui](https://github.com/yargs/cliui) for help formatting:
 ```bash
 node example/parser.js --help
-Usage: example/parser
-  --billing_address [
-    # address affiliated with credit card
-    --street_address <string> [required]               # street number and name
-    --city <string>           [default: "Austin"]
-    --state <string>          [default: "TX"]
+
+Usage: example/parser.js
+
+A delivery order
+
+Arguments:
+
+  --billing_address [                                # address affiliated with credit card
+    --street_address <string>   [required]           # street number and name
+    --city <string>             [default: "Austin"]
+    --state <string>            [default: "TX"]
   ]
-  --items [
+  --items [                                          # array of items to purchase
     [
-      --name <string>         [required]
-      --price <number>        [optional]
-    ], ...items
+      --name <string>           [required]
+      --price <number>          [optional]
+    ],
+    ...items
   ]
-  --shipping_address [
-    # address to which we will ship the package
-    --street_address <string> [optional]               # street number and name
-    --city <string>           [default: "Austin"]
-    --state <string>          [default: "TX"]
-    --type <string>           [optional]
+  --shipping_address [                               # address to which we will ship the package
+    --street_address <string>   [optional]           # street number and name
+    --city <string>             [default: "Austin"]
+    --state <string>            [default: "TX"]
+    --type <string>             [optional]
   ]
 ```
 By default help is displayed with the flag `--help` or on error,
@@ -85,7 +90,7 @@ Currently, the only "schema intelligence" `--help` currently has is the ability 
 
   
 ## In depth usage / customization
-The [`default` export `newParser({schema, schemaCaster, name, helpOptions})`](src/parser.js#L32) returns a `parser` that takes an optional array of `argv` arguments,
+The [`default` export `newParser({schema, schemaCaster, name, description, helpOptions})`](src/parser.js#L32) returns a `parser` that takes an optional array of `argv` arguments,
 defaulting to `process.argv.slice(2)`, and returns the validated/cast result.
 
 `schema` and `schemaCaster` are mutually exclusive, and `schemaCaster` takes precedence.
